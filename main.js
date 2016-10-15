@@ -1,4 +1,8 @@
+
 const electron = require('electron')
+const ipcMain = require('electron').ipcMain
+
+
 // Module to control application life.
 const app = electron.app
 // Module to create native browser window.
@@ -9,18 +13,38 @@ const BrowserWindow = electron.BrowserWindow
 let mainWindow
 
 function createWindow () {
+ // createCatchWindow (); 
+  createMainWindow();
+}
+function createMainWindow () {
+   
   // Create the browser window.
   mainWindow = new BrowserWindow({
+    frame:true,
+    resizable: false,
+    //alwaysOnTop:true,
+    title:'BestSellers',
+    titleBarStyle:'hidden-inset',
+   // fullscreen:true,
+   //backgroundColor:'#80FFFFFF',
     width: 1280,
     height: 800,
     'min-width': 500,
     'min-height': 500,
     'accept-first-mouse': true,
-    'title-bar-style': 'hidden'
+    
+    webPreferences: {
+        experimentalFeatures:true,
+        experimentalCanvasFeatures:true,
+        plugins: true,
+        nodeIntegration: true,//这句是使用node 模块
+        //webSecurity: false,
+        //preload: path.join(__dirname, '../../inject/preload.js'),
+      }
   })
 
-  // and load the index.html of the app.
-  mainWindow.loadURL(`file://${__dirname}/index.html`)
+  //读取 index.html ，设置path位置.
+  mainWindow.loadURL(`file://${__dirname}/app/index.html`)
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools()
@@ -33,6 +57,132 @@ function createWindow () {
     mainWindow = null
   })
 }
+
+let amazonWindow;
+function createAmazonWindow () {
+  // Create the browser window.
+  amazonWindow = new BrowserWindow({
+    frame:true,
+    resizable: false,
+    //alwaysOnTop:true,
+    title:'BestSellers',
+    titleBarStyle:'hidden-inset',
+   // fullscreen:true,
+   //backgroundColor:'#80FFFFFF',
+    width: 1280,
+    height: 800,
+    'min-width': 500,
+    'min-height': 500,
+    'accept-first-mouse': true,
+    
+    webPreferences: {
+        experimentalFeatures:true,
+        experimentalCanvasFeatures:true,
+        plugins: true,
+        nodeIntegration: true,//这句是使用node 模块
+        //webSecurity: false,
+        //preload: path.join(__dirname, '../../inject/preload.js'),
+      }
+  })
+
+  //amazonWindow.loadURL('https://www.amazon.com/Best-Sellers-Appliances/zgbs/appliances/ref=zg_bs_nav_0')
+  amazonWindow.loadURL(`file://${__dirname}/app/tpl/amazon.html`)
+
+  // Open the DevTools.
+  amazonWindow.webContents.openDevTools()
+/*
+
+  amazonWindow.webContents.on('did-finish-load', () => {
+  amazonWindow.webContents.savePage('tmp/test.html', 'HTMLOnly', (error) => {
+    if (!error) console.log('Save page successfully')
+  })
+  })
+*/
+
+
+
+
+
+  // Emitted when the window is closed.
+  amazonWindow.on('closed', function () {
+    amazonWindow = null
+  })
+}
+
+
+//
+let catchWin;
+function createCatchWindow () {
+  // Create the browser window.
+  catchWin = new BrowserWindow({
+    frame:false,
+    resizable: false,
+    alwaysOnTop:true,
+    title:'BestSellers',
+    titleBarStyle:'hidden-inset',
+   // fullscreen:true,
+   //backgroundColor:'#80FFFFFF',
+    width: 300,
+    height: 600,
+    x:0,
+    y:0,
+    center:false,
+    
+    
+    webPreferences: {
+        experimentalFeatures:true,
+        experimentalCanvasFeatures:true,
+        plugins: true,
+        nodeIntegration: true,//这句是使用node 模块
+        //webSecurity: false,
+        //preload: path.join(__dirname, '../../inject/preload.js'),
+      }
+  })
+
+  //读取 index.html ，设置path位置.
+  catchWin.loadURL(`file://${__dirname}/app/index.html`)
+
+  // Open the DevTools.
+  //catchWin.webContents.openDevTools()
+
+  // Emitted when the window is closed.
+  catchWin.on('closed', function () {
+    // Dereference the window object, usually you would store windows
+    // in an array if your app supports multi windows, this is the time
+    // when you should delete the corresponding element.
+    catchWin = null
+  })
+}
+
+
+
+ipcMain.on('click-button', function (event, arg) {
+  console.log(arg) ;
+
+  if (arg=="AnyDepartment") {
+    createAmazonWindow();
+
+  };
+  
+  
+  event.sender.send('click-button-reply', arg+"click")
+})
+
+ipcMain.on('asynchronous-message', function (event, arg) {
+  console.log(arg)  // prints "ping"
+  event.sender.send('asynchronous-reply', 'pong')
+})
+
+ipcMain.on('synchronous-message', function (event, arg) {
+  console.log(arg)  // prints "ping"
+  event.returnValue = 'pong'
+})
+
+ipcMain.on('catch',function(event,arg){
+  console.log(arg);
+  
+})
+
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

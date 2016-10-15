@@ -20,6 +20,6 @@
     "electron": "^1.4.1"
   },
   "dependencies": {
-    
+    "nconf": "^0.8.4"
   }
 }
