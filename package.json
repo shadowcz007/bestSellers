@@ -1,0 +1,25 @@
+{
+  "name": "bestSellers",
+  "version": "1.0.0",
+  "description": "application",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": "https://github.com/",
+  "keywords": [
+    "Electron",
+    "best",
+    "seller",
+    "tool",
+    "demo"
+  ],
+  "author": "shadow",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^1.4.1"
+  },
+  "dependencies": {
+    
+  }
+}
