@@ -2,7 +2,8 @@
 const electron = require('electron')
 const ipcMain = require('electron').ipcMain
 
-
+global.sharedObj = {myvar: "hellofrommainjs",
+                    result:"1"};
 // Module to control application life.
 const app = electron.app
 // Module to create native browser window.
@@ -60,24 +61,23 @@ function createMainWindow () {
 
 let amazonWindow;
 function createAmazonWindow () {
-  // Create the browser window.
+  
   amazonWindow = new BrowserWindow({
     frame:true,
-    resizable: false,
-    //alwaysOnTop:true,
-    title:'BestSellers',
+    resizable: true,
+    alwaysOnTop:true,
+    title:'Catch',
+    x:1,
+    y:1,
     titleBarStyle:'hidden-inset',
-   // fullscreen:true,
-   //backgroundColor:'#80FFFFFF',
-    width: 1280,
-    height: 800,
-    'min-width': 500,
-    'min-height': 500,
-    'accept-first-mouse': true,
+    closable:true,
+    movable:true,
+    width: 100,
+    height: 100,
     
     webPreferences: {
         experimentalFeatures:true,
-        experimentalCanvasFeatures:true,
+       // experimentalCanvasFeatures:true,
         plugins: true,
         nodeIntegration: true,//这句是使用node 模块
         //webSecurity: false,
@@ -122,8 +122,8 @@ function createCatchWindow () {
     titleBarStyle:'hidden-inset',
    // fullscreen:true,
    //backgroundColor:'#80FFFFFF',
-    width: 300,
-    height: 600,
+    width: 100,
+    height: 100,
     x:0,
     y:0,
     center:false,
@@ -160,9 +160,10 @@ ipcMain.on('click-button', function (event, arg) {
   console.log(arg) ;
 
   if (arg=="AnyDepartment") {
-    createAmazonWindow();
+    
 
   };
+
   
   
   event.sender.send('click-button-reply', arg+"click")
@@ -178,12 +179,30 @@ ipcMain.on('synchronous-message', function (event, arg) {
   event.returnValue = 'pong'
 })
 
-ipcMain.on('catch',function(event,arg){
+ipcMain.on('catch',function (event, arg) {
   console.log(arg);
+  if (amazonWindow==null) {
+    createAmazonWindow();
+  }else{
+    amazonWindow.reload();
+    amazonWindow.focusOnWebView();
+  };
   
+    global.sharedObj.dpf=arg;
+    global.sharedObj.type=arg[2];
+ 
+
+  //event.sender.send('catch-reply',arg);
+
 })
 
+ipcMain.on('catch-result-save',function (event, arg) {
+  console.log("catch-result-save"+arg);
+ //mainWindow.reload();
 
+  event.sender.send('catch-result-save-reply',arg);
+
+})
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
