@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+
+    <title>Catch</title>
+     <link rel="stylesheet" href="../css/photon.css">
+
+  </head>
+  <body>
+  <div class="indicator" ></div>
+  <div id="webview"></div>
+  
+  <div id="result"><br></div>
+ 
+
+    </body>
+
+
+  <script>
+const {remote,ipcRenderer} = require('electron');
+var obj=remote.getGlobal('sharedObj');
+    var path=require('path'); 
+    window.$ = window.jQuery = require(path.join(`${__dirname}`,'../js/libs/jquery.min.js'));
+
+    var Catch=require(path.join(`${__dirname}`,'../js/catch.js'))
+
+    var indicator = $(".indicator");
+    indicator.show();
+ let url;
+
+
+
+
+
+
+  $("#webview").append('<webview id="amazon" src="'+Catch.target[0]+'" useragent="Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; AS; rv:11.0) like Gecko" autosize="on" maxwidth="960" maxheight="600" minwidth="576" minheight="432" nodeintegration> </webview>')
+  var webview = document.getElementById("amazon");
+  //webview.loadURL('');
+  webviewJS();
+
+
+
+
+
+
+ function webviewJS() {
+
+    
+    
+
+    var webContents;
+
+
+    var css="#zg_browseRoot{color:red;fontsize:44px}"
+
+    var loadstart = function() {
+      //indicator.show();
+
+      console.log("loading");
+      
+    }
+    
+    var loadstop = function() {
+      indicator.hide();
+      //webview.print();
+      //webview.insertCSS(css);
+      
+    }
+
+    webview.addEventListener("did-start-loading", loadstart);
+    webview.addEventListener("did-stop-loading", loadstop);
+    webview.addEventListener('dom-ready', function () {
+     
+      if (obj.type==0) {
+        webview.executeJavaScript(`
+
+          const remote = require('electron').remote;
+
+          var html=document.getElementById("zg_browseRoot").childNodes[3].childNodes[3].getElementsByTagName("a");
+          var result=[];
+          for (var i = html.length - 1; i >= 0; i--){
+
+            var link=html[i].getAttribute("href");
+            result.push({
+                "title":link,
+                "link":link
+              })
+          };
+       
+          remote.getGlobal('sharedObj').result=result;  
+          console.log(remote.getGlobal('sharedObj').result)
+          console.log(JSON.stringify(result,null,2));
+          
+          `,false,function(){
+
+            console.log("catch ok");
+            Catch.save();
+            //.replace(/\n|\t/g,"")
+            //link..replace(/.*.com\/|\/dp.*/g,"")
+            });
+      };
+
+      if (obj.type==1) {
+        
+        webview.executeJavaScript(`
+
+          const remote = require('electron').remote;
+          var result=[];
+          var html=document.getElementsByClassName("zg_selected")[1].parentNode.parentNode.childNodes[3];
+          var nodeNameHTML=html.nodeName;
+
+          if (nodeNameHTML=="UL") {
+
+                var htmlLi=html.getElementsByTagName("a");
+
+                for (var i = htmlLi.length - 1; i >= 0; i--){
+
+                  var link=htmlLi[i].getAttribute("href");
+                  result.push({
+                      "title":link,
+                      "link":link
+                    })
+                };
+
+                remote.getGlobal('sharedObj').result=result; 
+
+          }else if(nodeNameHTML=="LI"){
+
+                remote.getGlobal('sharedObj').result=[]; 
+
+          };
+          
+        
+       
+          
+
+          console.log(remote.getGlobal('sharedObj').result)
+          console.log(JSON.stringify(result,null,2));
+          
+          `,false,function(){
+
+            console.log("catch ok");
+            Catch.save();
+          
+            });
+
+      };	  
+
+		 
+		  console.log("dom-ready");
+		  
+		  //webContents.downloadURL(url);
+		  webview.openDevTools();
+		  
+	})
+  }
+
+
+</script>
+</html>
